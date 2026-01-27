@@ -82,6 +82,53 @@ LIBEXPORT int vigra_importgrayimage_c(const PixelType * arr_out,
     return 0;
 }
 
+LIBEXPORT int vigra_importrgbmemory_c(const PixelType * arr_r_out,
+                                      const PixelType * arr_g_out,
+                                      const PixelType * arr_b_out,
+                                      const int width,
+                                      const int height,
+                                      const vigra::RGBValue<vigra::UInt8> * memory,
+                                      const int memory_size)
+{
+    try
+    {
+
+        if(memory_size == (3 * width * height))
+        {
+            //write the color channels to the different arrays, having read the
+            //camera image
+            vigra::Shape2 shape(width, height);
+            vigra::MultiArrayView<2, vigra::RGBValue<vigra::UInt8> > img(shape, memory);
+            ImageView img_red(shape, arr_r_out);
+            ImageView img_green(shape, arr_g_out);
+            ImageView img_blue(shape, arr_b_out);
+
+            auto red_iter   = img_red.begin(),
+                 green_iter = img_green.begin(),
+                 blue_iter  = img_blue.begin();
+
+            for(auto img_iter = img.begin();
+                img_iter != img.end();
+                ++img_iter, ++red_iter, ++green_iter, ++blue_iter)
+            {
+                *red_iter = img_iter->red();
+                *green_iter = img_iter->green();
+                *blue_iter = img_iter->blue();
+            }
+        }
+        else
+        {
+            return 3;
+        }
+    }
+    catch (vigra::StdException & e)
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
 LIBEXPORT int vigra_importrgbimage_c(const PixelType * arr_r_out,
                                      const PixelType * arr_g_out,
                                      const PixelType * arr_b_out,
