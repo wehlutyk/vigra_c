@@ -415,6 +415,61 @@ LIBEXPORT int vigra_regionimagetocrackedgeimage_c(const PixelType * arr_in,
     return 0;
 }
 
+LIBEXPORT int vigra_extractareapos_gray_c(const PixelType * arr_gray_in,
+                                          const PixelType * arr_labels_in,
+                                          const PixelType * arr_out,
+                                          const int width_in,
+                                          const int height_in,
+                                          const int max_label)
+{
+    using namespace vigra::acc;
+
+    try
+    {
+        vigra::Shape2 shape_in(width_in,height_in);
+
+        ImageView img_in(shape_in, arr_gray_in);
+        ImageView labels_in(shape_in, arr_labels_in);
+
+        //temp copy to int-type array
+        vigra::MultiArray<2, unsigned int> labels = labels_in;
+
+        //Order (x,y) with y = region_id (from 0...max_label) and:
+        // x=  0       - > region_size,
+        // x=( 1 ..  2) -> upperleft-x and y-coord
+        // x=( 3 ..  4) -> lowerright-x and y-coord
+        vigra::Shape2 shape_out(5, max_label+1);
+        ImageView img_out(shape_out, arr_out);
+
+        typedef
+            AccumulatorChainArray<vigra::CoupledArrays<2, PixelType, unsigned int>,
+                Select< DataArg<1>, LabelArg<2>, // in which array to look (coordinates are always arg 0)
+                        Count,
+                        Coord<Minimum>, Coord<Maximum> > >
+            AccumulatorType;
+
+        AccumulatorType a;
+
+        extractFeatures(img_in, labels, a);
+
+        for(unsigned int i=0; i!=max_label+1; ++i)
+        {
+            img_out(0, i) = get<Count>(a,i);
+
+            img_out(1, i) = get<Coord<Minimum>>(a,i)[0];
+            img_out(2, i) = get<Coord<Minimum>>(a,i)[1];
+
+            img_out(3, i) = get<Coord<Maximum>>(a,i)[0];
+            img_out(4, i) = get<Coord<Maximum>>(a,i)[1];
+        }
+    }
+    catch (vigra::StdException & e)
+    {
+        return 1;
+    }
+    return 0;
+}
+
 LIBEXPORT int vigra_extractfeatures_gray_c(const PixelType * arr_gray_in,
                                            const PixelType * arr_labels_in,
                                            const PixelType * arr_out,
