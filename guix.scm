@@ -30,7 +30,12 @@
     (native-inputs
      (list doxygen))
     (inputs
-     (list fftw fftwf hdf5 vigra))
+     (list fftw fftwf hdf5
+           vigra
+           ;; (primitive-load
+           ;;  (string-append (dirname (dirname (current-filename)))
+           ;;                 "/vigra/guix.scm"))
+           ))
     (synopsis "C interface to the VIGRA computer vision library")
     (description
      "This package provides a C interface to the VIGRA C++ computer vision
