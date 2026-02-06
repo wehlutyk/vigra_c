@@ -415,7 +415,7 @@ LIBEXPORT int vigra_regionimagetocrackedgeimage_c(const PixelType * arr_in,
     return 0;
 }
 
-LIBEXPORT int vigra_extractareapos_gray_c(const PixelType * arr_gray_in,
+LIBEXPORT int vigra_extractareabox_gray_c(const PixelType * arr_gray_in,
                                           const PixelType * arr_labels_in,
                                           const PixelType * arr_out,
                                           const int width_in,
